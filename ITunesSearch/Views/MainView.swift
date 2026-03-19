@@ -14,7 +14,7 @@ struct MainView: View {
     
     var body: some View {
         NavigationStack {
-            List {
+            VStack {
                 Section("검색") {
                     LabeledContent {
                         // content View
@@ -46,30 +46,37 @@ struct MainView: View {
                     .background(Color.blue.opacity(0.7))
                     .clipShape(RoundedRectangle(cornerRadius: 10))
                 }
+                .padding(.vertical, 10)
+                .padding(.horizontal, 20)
                 
-                Section("총 결과: \(String(vm.numberOfResults)) 개") {
+                Text("총 결과: \(String(vm.numberOfResults)) 개")
+                List {
                     ForEach(vm.trackResults) { track in
                         Section {
+                            VStack(alignment: .leading) {
+                                if let artist = track.artistName {
+                                    Text(artist)
+                                }
+                                if let collectionTitle = track.collectionName {
+                                    Text(collectionTitle)
+                                }
+                                if let genre = track.primaryGenreName {
+                                    Text(genre)
+                                }
+                            }//:VSTACK
+                        } header: {
                             if let trackTitle = track.trackName {
                                 Text("🎶 \(trackTitle)")
                             }
-                            if let artist = track.artistName {
-                                Text(artist)
-                            }
-                            if let collectionTitle = track.collectionName {
-                                Text(collectionTitle)
-                            }
-                            if let genre = track.primaryGenreName {
-                                Text(genre)
-                            }
-                        }
-                    }
-                }
-            }
+                        }//:SECTION
+                    } //:LOOP
+                } //:LIST
+                Spacer()
+            } //:VSTACK
             .navigationTitle("🎵 iTunes Search")
             .navigationBarTitleDisplayMode(.inline)
-        }
-    }
+        } //:NAVIGATION
+    }//:body
 }
 
 #Preview {
