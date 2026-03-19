@@ -11,6 +11,8 @@ struct MainView: View {
     
     @State private var vm: NetworkViewModel = .init()
     @State private var searchText: String = ""
+    @State private var isProgressing: Bool = false
+    @State private var errorMessage: String? = nil
     
     var body: some View {
         NavigationStack {
@@ -32,10 +34,16 @@ struct MainView: View {
                     
                     Button("Search") {
                         vm.modifiedText = searchText.replacingOccurrences(of: " ", with: "+")
-                        do {
-                            try vm.getTracksInfo()
-                        } catch {
-                            print(error)
+                        self.isProgressing = true
+                        Task {
+                            do {
+                                try await vm.getMusicInfo()
+                                self.errorMessage = nil
+                                self.isProgressing = false
+                            } catch {
+                                self.errorMessage = "검색 결과가 없습니다"
+                                self.isProgressing = false
+                            }
                         }
                     }
                     .font(.title3)
@@ -49,29 +57,39 @@ struct MainView: View {
                 .padding(.vertical, 10)
                 .padding(.horizontal, 20)
                 
-                Text("총 결과: \(String(vm.numberOfResults)) 개")
-                List {
-                    ForEach(vm.trackResults) { track in
-                        Section {
-                            VStack(alignment: .leading) {
-                                if let artist = track.artistName {
-                                    Text(artist)
+                if let error = self.errorMessage {
+                    Text(error)
+                    Spacer()
+                } else if self.isProgressing {
+                    ProgressView {
+                        Text("searching...")
+                    }
+                    Spacer()
+                } else {
+                    Text("총 결과: \(String(vm.numberOfResults)) 개")
+                    List {
+                        ForEach(vm.trackResults) { track in
+                            Section {
+                                VStack(alignment: .leading) {
+                                    if let artist = track.artistName {
+                                        Text(artist)
+                                    }
+                                    if let collectionTitle = track.collectionName {
+                                        Text(collectionTitle)
+                                    }
+                                    if let genre = track.primaryGenreName {
+                                        Text(genre)
+                                    }
+                                }//:VSTACK
+                            } header: {
+                                if let trackTitle = track.trackName {
+                                    Text("🎶 \(trackTitle)")
                                 }
-                                if let collectionTitle = track.collectionName {
-                                    Text(collectionTitle)
-                                }
-                                if let genre = track.primaryGenreName {
-                                    Text(genre)
-                                }
-                            }//:VSTACK
-                        } header: {
-                            if let trackTitle = track.trackName {
-                                Text("🎶 \(trackTitle)")
-                            }
-                        }//:SECTION
-                    } //:LOOP
-                } //:LIST
-                Spacer()
+                            }//:SECTION
+                        } //:LOOP
+                    } //:LIST
+                    Spacer()
+                }//:CONDITIONAL
             } //:VSTACK
             .navigationTitle("🎵 iTunes Search")
             .navigationBarTitleDisplayMode(.inline)
