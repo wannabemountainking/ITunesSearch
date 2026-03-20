@@ -19,8 +19,16 @@ struct Track: Identifiable, Codable {
     var artistName: String?
     var collectionName: String?
     var primaryGenreName: String?
+    var trackInfo: [(label: String, value: String?)] {
+        [
+            (label: "artist", value: artistName),
+            (label: "collection", value: collectionName),
+            (label: "genre", value: primaryGenreName)
+        ]
+    }
     
     enum CodingKeys: String, CodingKey {
         case trackName, artistName, collectionName, primaryGenreName
     }
+    
 }

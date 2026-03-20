@@ -70,17 +70,14 @@ struct MainView: View {
                     List {
                         ForEach(vm.trackResults) { track in
                             Section {
-                                VStack(alignment: .leading) {
-                                    if let artist = track.artistName {
-                                        Text(artist)
+                                ForEach(track.trackInfo,
+                                    id: \.label
+                                )
+                                { (label, info) in
+                                    if let info {
+                                        Text(info)
                                     }
-                                    if let collectionTitle = track.collectionName {
-                                        Text(collectionTitle)
-                                    }
-                                    if let genre = track.primaryGenreName {
-                                        Text(genre)
-                                    }
-                                }//:VSTACK
+                                } //:LOOP
                             } header: {
                                 if let trackTitle = track.trackName {
                                     Text("🎶 \(trackTitle)")
